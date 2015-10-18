@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using NUnit.Framework;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+using NUnit.Framework;
 using System.IO;
-using Microsoft.CodeAnalysis.MSBuild;
-using System.Threading.Tasks;
+using System.Linq;
 
 namespace RetroSharp.Tests
 {
