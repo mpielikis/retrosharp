@@ -1,6 +1,28 @@
 # RetroSharp
 convert modern C# code to the generics free code
 
+```
+static void Main(string[] args) 
+{ 
+    var a = new A<string>();
+
+    a.GenericProperty = "Hello, World!";
+
+    Console.WriteLine(a.GenericProperty);
+}
+```
+becomes
+```
+static void Main(string[] args) 
+{ 
+    var a = new A();
+
+    a.GenericProperty = "Hello, World!";
+
+    Console.WriteLine((string)a.GenericProperty);
+}
+```
+
 #Build
 
 ####Windows
