@@ -10,7 +10,7 @@ namespace Solution1
 
             a.GenericProperty = "Hello, World!";
 
-            Console.WriteLine(a.GenericProperty);
+            Console.WriteLine(a.GenericMethod(a.GenericProperty));
         }
     }
 }
