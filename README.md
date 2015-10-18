@@ -5,6 +5,7 @@ convert modern C# code to the generics free code
 class A<T>
 {
     public T GenericProperty { get; set; }
+    public T GenericMethod(T arg) { return arg; }
 }
 
 class Program
@@ -12,10 +13,10 @@ class Program
     static void Main(string[] args) 
     { 
         var a = new A<string>();
-    
+
         a.GenericProperty = "Hello, World!";
-    
-        Console.WriteLine(a.GenericProperty);
+
+        Console.WriteLine(a.GenericMethod(a.GenericProperty));
     }
 }
 ```
@@ -24,6 +25,7 @@ becomes
 class A
 {
     public object GenericProperty { get; set; }
+    public object GenericMethod(object arg) { return arg; }
 }
 
 class Program
@@ -31,10 +33,10 @@ class Program
     static void Main(string[] args) 
     { 
         var a = new A();
-    
+
         a.GenericProperty = "Hello, World!";
-    
-        Console.WriteLine((string)a.GenericProperty);
+
+        Console.WriteLine((string)a.GenericMethod((string)a.GenericProperty));
     }
 }
 ```
