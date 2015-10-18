@@ -2,24 +2,40 @@
 convert modern C# code to the generics free code
 
 ```cs
-static void Main(string[] args) 
-{ 
-    var a = new A<string>();
+class A<T>
+{
+    public T GenericProperty { get; set; }
+}
 
-    a.GenericProperty = "Hello, World!";
-
-    Console.WriteLine(a.GenericProperty);
+class Program
+{
+    static void Main(string[] args) 
+    { 
+        var a = new A<string>();
+    
+        a.GenericProperty = "Hello, World!";
+    
+        Console.WriteLine(a.GenericProperty);
+    }
 }
 ```
 becomes
 ```cs
-static void Main(string[] args) 
-{ 
-    var a = new A();
+class A
+{
+    public object GenericProperty { get; set; }
+}
 
-    a.GenericProperty = "Hello, World!";
-
-    Console.WriteLine((string)a.GenericProperty);
+class Program
+{
+    static void Main(string[] args) 
+    { 
+        var a = new A();
+    
+        a.GenericProperty = "Hello, World!";
+    
+        Console.WriteLine((string)a.GenericProperty);
+    }
 }
 ```
 
