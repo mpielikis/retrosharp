@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using RetroSharp.Rewriters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,8 +26,6 @@ namespace RetroSharp
         public static async Task<Project> MakeRetro(Project prj)
         {
             var compilation = await prj.GetCompilationAsync();
-            
-            // GetPropertiesToCast
 
             var changedDocuments = MakeChanges(compilation);
 
@@ -52,10 +51,8 @@ namespace RetroSharp
 
             var changedNodes = new List<Tuple<SyntaxTree, SyntaxNode>>();
 
-            // get changes for retro methods
             var methodChanges = GetRetroMethods(compilation, objectType);
 
-            // apply changes and remove generics by syntax tree
             foreach (var treeGroup in methodChanges.GroupBy(x => x.Key.SyntaxTree))
             {
                 var root = treeGroup.Key.GetRoot();
@@ -76,9 +73,9 @@ namespace RetroSharp
 
             // FIND
             // 1. Generic properties symbols
+            // 2. Generic method symbols
             // =============================
 
-            // NOTE -
             var genericPropertiesList = new List<IPropertySymbol>();
             var genericMethodsList = new List<IMethodSymbol>();
 
@@ -93,7 +90,6 @@ namespace RetroSharp
                 var classDeclarations = genericClassFinder.Get().ToArray();
 
                 SyntaxNode newTree = tree.GetRoot();
-                // Find reference to it's members
 
                 // methods symbols
                 var methodsToCast = classDeclarations
@@ -115,8 +111,8 @@ namespace RetroSharp
             var genRefs = new GenRef(genericMethodsList, genericPropertiesList);
 
              //CHANGE
-             //1. Generic properties references with cast
-             //2. Generic properties to Object properties
+             //1. Generic references with cast
+             //2. Generic T to Object
              //======
 
             foreach (var semanticModel in semanticModels)
@@ -127,7 +123,7 @@ namespace RetroSharp
                 var castReferences = new Dictionary<SyntaxNode, SyntaxNode>();
                 CastResursiveMethod(root, semanticModel, genRefs, castReferences);
                 
-                // get generic properties to object properties
+                // get generic T to object
                 var retroProperties = GenericToObject(root, semanticModel, objectType);
 
                 var allChanges = castReferences.Concat(retroProperties);
@@ -147,8 +143,6 @@ namespace RetroSharp
             {
                 ITypeSymbol ts = null;
                 
-                // if invocation -> ITypeSymbol
-                // -------------------------
                 if (node is InvocationExpressionSyntax)
                 {
                     ISymbol invokedSymbol = semanticModel.GetSymbolInfo(node).Symbol;
@@ -175,7 +169,6 @@ namespace RetroSharp
 
                 if (ts != null)
                 {
-                    // do cast
                     casted = Helpers.CastTo((ExpressionSyntax)casted, ts);
 
                     if (node.Parent is MemberAccessExpressionSyntax)
@@ -184,7 +177,6 @@ namespace RetroSharp
                     castChanges.Add(node, casted);
                 }
 
-                // add for replace
                 if (node != casted)
                     change.Add(node, casted);
             }
@@ -200,9 +192,7 @@ namespace RetroSharp
             foreach (var node in tree.DescendantNodes().OfType<ClassDeclarationSyntax>())
             {
                 var info = semanticModel.GetDeclaredSymbol(node);
-
-                // If class is generic
-
+                
                 if (info.IsGenericType)
                 {
                     var typeParameters = new HashSet<ITypeParameterSymbol>(info.TypeParameters);
