@@ -1,7 +1,7 @@
 # RetroSharp
 convert modern C# code to the generics free code
 
-```
+```cs
 static void Main(string[] args) 
 { 
     var a = new A<string>();
@@ -12,7 +12,7 @@ static void Main(string[] args)
 }
 ```
 becomes
-```
+```cs
 static void Main(string[] args) 
 { 
     var a = new A();
