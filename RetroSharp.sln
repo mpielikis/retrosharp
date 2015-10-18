@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30723.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RetroSharp", "RetroSharp\RetroSharp.csproj", "{D0FDB216-AD15-4B86-A408-5D04069D2F7D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RetroSharp.Tests", "RetroSharp.Tests\RetroSharp.Tests.csproj", "{EFE7E51C-BB62-4EDB-8A22-FB7D0B3A09EF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D0FDB216-AD15-4B86-A408-5D04069D2F7D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D0FDB216-AD15-4B86-A408-5D04069D2F7D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D0FDB216-AD15-4B86-A408-5D04069D2F7D}.Debug|x86.ActiveCfg = Debug|x86
+		{D0FDB216-AD15-4B86-A408-5D04069D2F7D}.Debug|x86.Build.0 = Debug|x86
+		{D0FDB216-AD15-4B86-A408-5D04069D2F7D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D0FDB216-AD15-4B86-A408-5D04069D2F7D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D0FDB216-AD15-4B86-A408-5D04069D2F7D}.Release|x86.ActiveCfg = Release|x86
+		{D0FDB216-AD15-4B86-A408-5D04069D2F7D}.Release|x86.Build.0 = Release|x86
+		{EFE7E51C-BB62-4EDB-8A22-FB7D0B3A09EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EFE7E51C-BB62-4EDB-8A22-FB7D0B3A09EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EFE7E51C-BB62-4EDB-8A22-FB7D0B3A09EF}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{EFE7E51C-BB62-4EDB-8A22-FB7D0B3A09EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EFE7E51C-BB62-4EDB-8A22-FB7D0B3A09EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EFE7E51C-BB62-4EDB-8A22-FB7D0B3A09EF}.Release|x86.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
