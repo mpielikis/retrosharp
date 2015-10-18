@@ -6,7 +6,7 @@ convert modern C# code to the generics free code
 ####Windows
 Requires a minimum of .NET Framework 4.5.2.
 ```
-    git clone https://github.com/OmniSharp/omnisharp-server.git
+    git clone https://github.com/mpielikis/retrosharp.git
     cd retrosharp
     msbuild
 ```
