@@ -92,19 +92,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="..\samples\Solution1\Project1\A.cs">
+      <Link>sample\Solution1\Project1\A.cs</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\samples\Solution1\Project1\Program.cs">
+      <Link>sample\Solution1\Project1\Program.cs</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\samples\Solution1\Project1\Properties\AssemblyInfo.cs">
+      <Link>sample\Solution1\Project1\Properties\AssemblyInfo.cs</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Compile Include="IntegrationTests.cs" />
     <Compile Include="RetroMethodsTests.cs" />
     <Compile Include="RetroPropertiesTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Content Include="sample\Solution1\Project1\A.cs">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="sample\Solution1\Project1\Program.cs">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="sample\Solution1\Project1\Properties\AssemblyInfo.cs">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config">
@@ -112,18 +115,20 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="sample\Solution1\Project1\Project1.csproj">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="sample\Solution1\Solution1.sln">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\RetroSharp\RetroSharp.csproj">
       <Project>{d0fdb216-ad15-4b86-a408-5d04069d2f7d}</Project>
       <Name>RetroSharp</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\samples\Solution1\Project1\Project1.csproj">
+      <Link>sample\Solution1\Project1\Project1.csproj</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\samples\Solution1\Solution1.sln">
+      <Link>sample\Solution1\Solution1.sln</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
