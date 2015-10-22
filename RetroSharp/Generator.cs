@@ -9,18 +9,6 @@ using System.Threading.Tasks;
 
 namespace RetroSharp
 {
-    class GenRef
-    {
-        public readonly HashSet<ISymbol> Methods = new HashSet<ISymbol>();
-        public readonly HashSet<ISymbol> Properties = new HashSet<ISymbol>();
-
-        public GenRef(IEnumerable<ISymbol> methods, IEnumerable<ISymbol> properties)
-        {
-            this.Methods = new HashSet<ISymbol>(methods);
-            this.Properties = new HashSet<ISymbol>(properties);
-        }
-    }
-
     public class Generator
     {
         public static async Task<Project> MakeRetro(Project prj)
@@ -51,14 +39,15 @@ namespace RetroSharp
 
             var changedNodes = new List<Tuple<SyntaxTree, SyntaxNode>>();
 
-            var methodChanges = GetRetroMethods(compilation, objectType);
+            var retroChanges = GetRetroChanges(compilation, objectType);
 
-            foreach (var treeGroup in methodChanges.GroupBy(x => x.Key.SyntaxTree))
+            foreach (var treeGroup in retroChanges.GroupBy(x => x.Key.SyntaxTree))
             {
                 var root = treeGroup.Key.GetRoot();
 
-                var treeAfterReplace = root.ReplaceNodes(treeGroup.Select(x => x.Key), (x, y) => methodChanges[x]);
+                var treeAfterReplace = root.ReplaceNodes(treeGroup.Select(x => x.Key), (x, y) => retroChanges[x]);
 
+                // final cleanup: remove generics
                 var clean = new RemoveGenericNames().Visit(
                     new RemoveGenericClass().Visit(treeAfterReplace));
 
@@ -67,10 +56,41 @@ namespace RetroSharp
 
         }
 
-        private static IDictionary<SyntaxNode, SyntaxNode> GetRetroMethods(Compilation compilation, INamedTypeSymbol objectType)
+        private static IDictionary<SyntaxNode, SyntaxNode> GetRetroChanges(Compilation compilation, INamedTypeSymbol objectType)
         {
             var syntaxNodes = new Dictionary<SyntaxNode, SyntaxNode>();
 
+            var semanticModels = compilation.SyntaxTrees.Select(x => compilation.GetSemanticModel(x));
+
+            var genRefs = FindGenericClassMembers(semanticModels);
+
+             //CHANGE
+             //1. Generic references with cast
+             //2. Generic T to Object
+             //======
+
+            foreach (var semanticModel in semanticModels)
+            {
+                var root = semanticModel.SyntaxTree.GetRoot();
+
+                // get cast changes
+                var castReferences = new Dictionary<SyntaxNode, SyntaxNode>();
+                CastResursiveMethod(root, semanticModel, genRefs, castReferences);
+                
+                // get generic T to object
+                var retroProperties = GenericToObject(root, semanticModel, objectType);
+
+                var allChanges = castReferences.Concat(retroProperties);
+
+                foreach (var ch in allChanges)
+                    syntaxNodes.Add(ch.Key, ch.Value);
+            }
+
+            return syntaxNodes;
+        }
+
+        private static GenRef FindGenericClassMembers(IEnumerable<SemanticModel> semanticModels)
+        {
             // FIND
             // 1. Generic properties symbols
             // 2. Generic method symbols
@@ -78,8 +98,6 @@ namespace RetroSharp
 
             var genericPropertiesList = new List<IPropertySymbol>();
             var genericMethodsList = new List<IMethodSymbol>();
-
-            var semanticModels = compilation.SyntaxTrees.Select(x => compilation.GetSemanticModel(x));
 
             foreach (var semanticModel in semanticModels)
             {
@@ -107,32 +125,9 @@ namespace RetroSharp
 
                 genericPropertiesList.AddRange(propertiesToCast);
             }
-            
+
             var genRefs = new GenRef(genericMethodsList, genericPropertiesList);
-
-             //CHANGE
-             //1. Generic references with cast
-             //2. Generic T to Object
-             //======
-
-            foreach (var semanticModel in semanticModels)
-            {
-                var root = semanticModel.SyntaxTree.GetRoot();
-
-                // get cast changes
-                var castReferences = new Dictionary<SyntaxNode, SyntaxNode>();
-                CastResursiveMethod(root, semanticModel, genRefs, castReferences);
-                
-                // get generic T to object
-                var retroProperties = GenericToObject(root, semanticModel, objectType);
-
-                var allChanges = castReferences.Concat(retroProperties);
-
-                foreach (var ch in allChanges)
-                    syntaxNodes.Add(ch.Key, ch.Value);
-            }
-
-            return syntaxNodes;
+            return genRefs;
         }
 
         private static SyntaxNode CastResursiveMethod(SyntaxNode tree, SemanticModel semanticModel, GenRef genRef, Dictionary<SyntaxNode, SyntaxNode> castChanges)
@@ -141,31 +136,10 @@ namespace RetroSharp
 
             foreach (var node in tree.ChildNodes())
             {
-                ITypeSymbol ts = null;
-                
-                if (node is InvocationExpressionSyntax)
-                {
-                    ISymbol invokedSymbol = semanticModel.GetSymbolInfo(node).Symbol;
-
-                    // if is generic method
-                    if (genRef.Methods.Contains(invokedSymbol.OriginalDefinition))
-                    {
-                        ts = ((IMethodSymbol)invokedSymbol).ReturnType;                        
-                    }
-                }
-                else if ((node is MemberAccessExpressionSyntax) && !(node.Parent is AssignmentExpressionSyntax))
-                {
-                    ISymbol invokedSymbol = semanticModel.GetSymbolInfo(node).Symbol;
-
-                    // if is generic property
-                    if (genRef.Properties.Contains(invokedSymbol.OriginalDefinition))
-                    {
-                        ts = ((IPropertySymbol)invokedSymbol).Type;                        
-                    }
-                }
-
                 // recurse for changed node
                 var casted = CastResursiveMethod(node, semanticModel, genRef, castChanges);
+
+                var ts = GetGenericType(node, genRef, semanticModel);
 
                 if (ts != null)
                 {
@@ -185,6 +159,32 @@ namespace RetroSharp
                 tree = tree.ReplaceNodes(change.Keys, (x, y) => change[x]);
 
             return tree;
+        }
+
+        private static ITypeSymbol GetGenericType(SyntaxNode node, GenRef genRef, SemanticModel semanticModel)
+        {
+            if (node is InvocationExpressionSyntax)
+            {
+                ISymbol invokedSymbol = semanticModel.GetSymbolInfo(node).Symbol;
+
+                // if is generic method
+                if (genRef.Methods.Contains(invokedSymbol.OriginalDefinition))
+                {
+                    return ((IMethodSymbol)invokedSymbol).ReturnType;
+                }
+            }
+            else if ((node is MemberAccessExpressionSyntax) && !(node.Parent is AssignmentExpressionSyntax))
+            {
+                ISymbol invokedSymbol = semanticModel.GetSymbolInfo(node).Symbol;
+
+                // if is generic property
+                if (genRef.Properties.Contains(invokedSymbol.OriginalDefinition))
+                {
+                    return ((IPropertySymbol)invokedSymbol).Type;
+                }
+            }
+
+            return null;
         }
 
         private static IEnumerable<KeyValuePair<SyntaxNode, SyntaxNode>> GenericToObject(SyntaxNode tree, SemanticModel semanticModel, INamedTypeSymbol symbol)
@@ -218,6 +218,18 @@ namespace RetroSharp
                     yield return new KeyValuePair<SyntaxNode, SyntaxNode>(node, typeSynax);
                 }
             }
+        }
+    }
+
+    class GenRef
+    {
+        public readonly HashSet<ISymbol> Methods = new HashSet<ISymbol>();
+        public readonly HashSet<ISymbol> Properties = new HashSet<ISymbol>();
+
+        public GenRef(IEnumerable<ISymbol> methods, IEnumerable<ISymbol> properties)
+        {
+            this.Methods = new HashSet<ISymbol>(methods);
+            this.Properties = new HashSet<ISymbol>(properties);
         }
     }
 }
